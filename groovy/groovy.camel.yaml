@@ -1,31 +1,32 @@
 - route:
-    id: route-4030
+    id: route-1681
     from:
-      id: from-2676
-      uri: timer
+      id: from-1133
+      uri: once
       parameters:
-        period: "2000"
-        timerName: template
+        name: validate
       steps:
-        - setBody:
-            id: setBody-2234
+        - setHeader:
+            id: setHeader-4262
             constant:
-              expression: '{"greeting": "Hello from Camel", "framework": "Apache Camel",
-                "language": "Groovy"}'
-        - transform:
-            id: transform-2043
-            groovy:
-              expression: |
-                  import groovy.json.JsonSlurper
-                  import groovy.json.JsonOutput
+              expression: user@example.com
+            name: contactEmail
+        - choice:
+            id: choice-1178
+            otherwise:
+              id: otherwise-1234
+              steps:
+                - log:
+                    id: log-3646
+                    message: "Invalid email: ${header.contactEmail}"
+            when:
+              - id: when-1441
+                steps:
+                  - log:
+                      id: log-2349
+                      message: "Valid contact: ${header.contactEmail}"
+                groovy:
+                  expression: >-
+                    import org.apache.commons.validator.routines.EmailValidator
 
-                  def slurper = new JsonSlurper()
-                  def json = slurper.parseText(request.body)
-
-                  json.processed = true
-                  json.timestamp = java.time.LocalDateTime.now().toString()
-
-                  JsonOutput.prettyPrint(JsonOutput.toJson(json))
-        - log:
-            id: log-1102
-            message: ${body}
+                    EmailValidator.getInstance().isValid(request.headers['contactEmail'])
