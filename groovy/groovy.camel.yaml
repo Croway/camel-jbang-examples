@@ -1,0 +1,31 @@
+- route:
+    id: route-4030
+    from:
+      id: from-2676
+      uri: timer
+      parameters:
+        period: "2000"
+        timerName: template
+      steps:
+        - setBody:
+            id: setBody-2234
+            constant:
+              expression: '{"greeting": "Hello from Camel", "framework": "Apache Camel",
+                "language": "Groovy"}'
+        - transform:
+            id: transform-2043
+            groovy:
+              expression: |
+                  import groovy.json.JsonSlurper
+                  import groovy.json.JsonOutput
+
+                  def slurper = new JsonSlurper()
+                  def json = slurper.parseText(request.body)
+
+                  json.processed = true
+                  json.timestamp = java.time.LocalDateTime.now().toString()
+
+                  JsonOutput.prettyPrint(JsonOutput.toJson(json))
+        - log:
+            id: log-1102
+            message: ${body}
